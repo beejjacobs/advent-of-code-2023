@@ -83,7 +83,7 @@ function partNumbers(lines) {
 	const gears = findGears(lines);
 	for (const [x, y] of gears) {
 		const positions = positionsAroundSymbol(lines, x, y);
-		/** @type {Map<string, NumberValue>} */
+		/** @type {Map<string, number>} */
 		const numbers = new Map();
 		for (const position of positions) {
 			if (numberPositions.has(position)) {
