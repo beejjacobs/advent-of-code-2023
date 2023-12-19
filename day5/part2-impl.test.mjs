@@ -1,5 +1,5 @@
 import {describe, test} from 'node:test';
-import { computeLowestLocation, inverseRanges, rangeIntersection } from './day5-part2-impl.mjs';
+import { computeLowestLocation, inverseRanges, rangeIntersection } from './part2-impl.mjs';
 import assert from 'node:assert/strict';
 
 describe('computeLowestLocation', () => {
