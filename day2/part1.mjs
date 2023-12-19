@@ -1,4 +1,8 @@
 import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const config = {
     red: 12,
@@ -7,7 +11,7 @@ const config = {
 };
 
 async function run() {
-    const content = await fs.readFile('day2.txt');
+    const content = await fs.readFile(path.join(__dirname, 'day2.txt'));
     const lines = content.toString()
         .split('\n')
         .map(l => l.trim())
