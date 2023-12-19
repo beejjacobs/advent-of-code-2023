@@ -152,6 +152,8 @@ export function inverseRanges(range, rangesToRemove) {
     if (rangesToRemove.length === 0) {
         return [range];
     }
+    // sort by start
+    rangesToRemove.sort((a, b) => a[0] - b[0]);
     const inverse = [];
     let previous;
     for (let i = 0; i < rangesToRemove.length; i++) {

@@ -128,6 +128,12 @@ describe('inverseRanges', () => {
             range: [1, 10],
             rangesToRemove: [[1, 1], [5, 6], [7, 8]],
             want: [[2, 4], [9, 10]]
+        },
+        {
+            name: 'out of order',
+            range: [79, 218],
+            rangesToRemove: [ [ 98, 99 ], [ 79, 97 ] ],
+            want: [[100, 218]]
         }
     ];
 
