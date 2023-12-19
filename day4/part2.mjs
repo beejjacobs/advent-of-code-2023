@@ -1,7 +1,11 @@
 import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
-    const content = await fs.readFile('day4.txt');
+    const content = await fs.readFile(path.join(__dirname, 'day4.txt'));
     const lines = content.toString()
         .split('\n')
         .map(l => l.trim())
@@ -80,7 +84,7 @@ function parseLine(line) {
         .filter(Boolean)
         .map(n => parseInt(n.trim()));
 
-    return {id, winningNumbers, inputNumbers};
+    return {id, winningNumbers, inputNumbers, winners: 0};
 }
 
 run().catch(console.error);
