@@ -1,7 +1,11 @@
 import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
-    const content = await fs.readFile('day3.txt');
+    const content = await fs.readFile(path.join(__dirname, 'day3.txt'));
     const lines = content.toString()
         .split('\n')
         .map(l => l.trim())
@@ -19,13 +23,6 @@ async function run() {
  * @property {string} id
  * @property {number} value
  */
-
-/**
- * @typedef {Object} Coords
- * @property {number} x
- * @property {number} y
- */
-
 
 /**
  *
@@ -77,47 +74,50 @@ function partNumbers(lines) {
 		}
     }
 
-	const gearRatios = [];
-
-	// find all gears
-	const gears = findGears(lines);
-	for (const [x, y] of gears) {
-		const positions = positionsAroundSymbol(lines, x, y);
-		/** @type {Map<string, number>} */
-		const numbers = new Map();
-		for (const position of positions) {
-			if (numberPositions.has(position)) {
-				const num = numberPositions.get(position);
-				numbers.set(num.id, num.value);
-			}
-		}
-		if (numbers.size === 2) {
-			const values = numbers.values();
-			const g1 = values.next();
-			const g2 = values.next();
-			gearRatios.push(g1.value * g2.value);
-		}
+	// find all symbols
+	const symbols = findSymbols(lines);
+	const positionsAdjacentToSymbols = new Set();
+	for (const [x, y] of symbols) {
+		positionsAroundSymbol(lines, x, y, positionsAdjacentToSymbols);
 	}
 
-    return gearRatios;
+    return numbersToCount(numberPositions, positionsAdjacentToSymbols);
 }
 
 /**
  * @param {string[]} lines
- * @returns {Coords[]}
+ * @returns {number[][]}
  */
-function findGears(lines) {
+function findSymbols(lines) {
 	const symbols = [];
 	for (let y = 0; y < lines.length; y++) {
 		const line = lines[y];
 		for (let x = 0; x < line.length; x++) {
 			const char = line[x];
-			if (char === '*') {
-				symbols.push([x, y]);
+			if (isDigit(char) || char === '.') {
+				continue;
 			}
+			symbols.push([x, y]);
 		}
 	}
 	return symbols;
+}
+
+/**
+ * @param {Map<string, NumberValue>} numberPositions
+ * @param {Set<string>} positionsAdjacentToSymbols
+ * @returns {number[]}
+ */
+function numbersToCount(numberPositions, positionsAdjacentToSymbols) {
+	const numbersToCount = new Map();
+	for (const position of positionsAdjacentToSymbols) {
+		if (numberPositions.has(position)) {
+			const num = numberPositions.get(position);
+			numbersToCount.set(num.id, num.value);
+		}
+	}
+
+	return [...numbersToCount.values()];
 }
 
 /**
@@ -125,10 +125,9 @@ function findGears(lines) {
  * @param {string[]} lines
  * @param {number} cX
  * @param {number} cY
- * @returns {string[]}
+ * @param {Set<string>} positionsAdjacentToSymbols
  */
-function positionsAroundSymbol(lines, cX, cY) {
-	const positions = [];
+function positionsAroundSymbol(lines, cX, cY, positionsAdjacentToSymbols) {
     const lineLength = lines[0].length;
     for (let dX = -1; dX <= 1; dX++) {
         for (let dY = -1; dY <= 1; dY++) {
@@ -140,10 +139,9 @@ function positionsAroundSymbol(lines, cX, cY) {
             if (x < 0 || x > lineLength) {
                 continue;
             }
-			positions.push(positionId(x, y));
+            positionsAdjacentToSymbols.add(positionId(x, y));
         }
     }
-	return positions;
 }
 
 /**

@@ -1,7 +1,11 @@
 import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function run() {
-    const content = await fs.readFile('day3.txt');
+    const content = await fs.readFile(path.join(__dirname, 'day3.txt'));
     const lines = content.toString()
         .split('\n')
         .map(l => l.trim())
@@ -19,7 +23,6 @@ async function run() {
  * @property {string} id
  * @property {number} value
  */
-
 
 /**
  *
@@ -71,50 +74,47 @@ function partNumbers(lines) {
 		}
     }
 
-	// find all symbols
-	const symbols = findSymbols(lines);
-	const positionsAdjacentToSymbols = new Set();
-	for (const [x, y] of symbols) {
-		positionsAroundSymbol(lines, x, y, positionsAdjacentToSymbols);
+	const gearRatios = [];
+
+	// find all gears
+	const gears = findGears(lines);
+	for (const [x, y] of gears) {
+		const positions = positionsAroundSymbol(lines, x, y);
+		/** @type {Map<string, number>} */
+		const numbers = new Map();
+		for (const position of positions) {
+			if (numberPositions.has(position)) {
+				const num = numberPositions.get(position);
+				numbers.set(num.id, num.value);
+			}
+		}
+		if (numbers.size === 2) {
+			const values = numbers.values();
+			const g1 = values.next();
+			const g2 = values.next();
+			gearRatios.push(g1.value * g2.value);
+		}
 	}
 
-    return numbersToCount(numberPositions, positionsAdjacentToSymbols);
+    return gearRatios;
 }
 
 /**
  * @param {string[]} lines
- * @returns {{x: number, y: number}[]}
+ * @returns {number[][]}
  */
-function findSymbols(lines) {
+function findGears(lines) {
 	const symbols = [];
 	for (let y = 0; y < lines.length; y++) {
 		const line = lines[y];
 		for (let x = 0; x < line.length; x++) {
 			const char = line[x];
-			if (isDigit(char) || char === '.') {
-				continue;
+			if (char === '*') {
+				symbols.push([x, y]);
 			}
-			symbols.push([x, y]);
 		}
 	}
 	return symbols;
-}
-
-/**
- * @param {Map<string, NumberValue>} numberPositions
- * @param {Set<string>} positionsAdjacentToSymbols
- * @returns {number[]}
- */
-function numbersToCount(numberPositions, positionsAdjacentToSymbols) {
-	const numbersToCount = new Map();
-	for (const position of positionsAdjacentToSymbols) {
-		if (numberPositions.has(position)) {
-			const num = numberPositions.get(position);
-			numbersToCount.set(num.id, num.value);
-		}
-	}
-
-	return [...numbersToCount.values()];
 }
 
 /**
@@ -122,9 +122,10 @@ function numbersToCount(numberPositions, positionsAdjacentToSymbols) {
  * @param {string[]} lines
  * @param {number} cX
  * @param {number} cY
- * @param {Set<string>} positionsAdjacentToSymbols
+ * @returns {string[]}
  */
-function positionsAroundSymbol(lines, cX, cY, positionsAdjacentToSymbols) {
+function positionsAroundSymbol(lines, cX, cY) {
+	const positions = [];
     const lineLength = lines[0].length;
     for (let dX = -1; dX <= 1; dX++) {
         for (let dY = -1; dY <= 1; dY++) {
@@ -136,9 +137,10 @@ function positionsAroundSymbol(lines, cX, cY, positionsAdjacentToSymbols) {
             if (x < 0 || x > lineLength) {
                 continue;
             }
-            positionsAdjacentToSymbols.add(positionId(x, y));
+			positions.push(positionId(x, y));
         }
     }
+	return positions;
 }
 
 /**
